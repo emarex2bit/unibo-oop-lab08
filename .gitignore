@@ -1,0 +1,79 @@
+# ===============================
+# Gitignore generale per Java
+# con più progetti / sottocartelle
+# ===============================
+
+# Compilati Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Directory di build comuni (per ogni sottoprogetto)
+**/build/
+**/out/
+**/target/
+**/bin/
+
+# File temporanei IDE
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.project
+.classpath
+.settings/
+.loadpath
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+
+# File di sistema
+.DS_Store
+Thumbs.db
+
+# Log e cache
+*.log
+**/logs/
+*.cache
+*.tmp
+*.swp
+
+# Configurazioni locali Gradle/Maven
+.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/gradle-wrapper.properties
+**/.gradle/
+mvnw
+mvnw.cmd
+
+# File temporanei di test o coverage
+**/test-output/
+**/surefire-reports/
+**/jacoco.exec
+**/coverage/
+**/reports/
+
+# Backup editor vari
+*~
+*.bak
+*.old
+
+# File di ambiente o configurazioni locali
+.env
+local.properties
