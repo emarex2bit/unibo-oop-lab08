@@ -1,8 +1,9 @@
 package it.unibo.deathnote.impl;
 
 import java.util.ArrayList;
-import it.unibo.deathnote.api.DeathNote;
+import java.util.List;
 
+import it.unibo.deathnote.api.DeathNote;
 
 /**
  * Death Note Implementation.
@@ -12,22 +13,24 @@ public class DeathNoteImpl implements DeathNote {
     public static final int MAX_MS_CAUSE = 40;
     public static final int MAX_MS_DETAILS = 6040;
 
-    private ArrayList<DeathNoteRecord> records;
+    private final List<DeathNoteRecord> records;
 
-    public DeathNoteImpl()
-    {
+    /**
+     * Death Note Object Init.
+     */
+    public DeathNoteImpl() {
         records = new ArrayList<>();
     }
+
     /**
      * Get rule number of @param ruleNumber.
      */
     @Override
     public String getRule(final int ruleNumber) {
-       if(ruleNumber < 1 || ruleNumber > DeathNote.RULES.size())
-       {
-            throw new IllegalArgumentException("Invalid rule number, only value in the range 1...." + DeathNote.RULES.size());
+       if (ruleNumber < 1 || ruleNumber > RULES.size()) {
+            throw new IllegalArgumentException("Invalid rule number, only value in the range 1...." + RULES.size());
        }
-       return DeathNote.RULES.get( ruleNumber - 1 );
+       return RULES.get(ruleNumber - 1);
     }
 
     /**
@@ -35,8 +38,7 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public void writeName(final String name) {
-        if(!isNameWritten(name))
-        {
+        if (!isNameWritten(name)) {
             records.add(new DeathNoteRecord(name));
         }
     }
@@ -46,11 +48,12 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public boolean writeDeathCause(final String cause) {
-        if(records.isEmpty()) throw new IllegalStateException("No name written");
+        if (records.isEmpty()) {
+            throw new IllegalStateException("No name written");
+        }
+        final DeathNoteRecord lastRecord = records.getLast();
 
-        DeathNoteRecord lastRecord = records.getLast();
-
-        return lastRecord.setCause(cause);
+        return lastRecord.writeCause(cause);
     }
 
     /**
@@ -58,11 +61,12 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public boolean writeDetails(final String details) {
-        if(records.isEmpty()) throw new IllegalStateException("No name written");
+        if (records.isEmpty()) {
+            throw new IllegalStateException("No name written");
+        }
+        final DeathNoteRecord lastRecord = records.getLast();
 
-        DeathNoteRecord lastRecord = records.getLast();
-
-        return lastRecord.setDetails(details);
+        return lastRecord.writeDetails(details);
     }
 
     /**
@@ -70,15 +74,16 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public String getDeathCause(final String name) {
-        DeathNoteRecord record = findRecord(name);
-        if(record == null) return "";
+        final DeathNoteRecord record = findRecord(name);
+        if (record == null) { 
+            return "";
+        }
         return record.getCause();
     }
 
-    private DeathNoteRecord findRecord(String name) {
-        for (var record : records) {
-            if(record.getName() == name)
-            {
+    private DeathNoteRecord findRecord(final String name) {
+        for (final var record : records) {
+            if (record.getName().equalsIgnoreCase(name)) {
                 return record;
             }
         }
@@ -90,8 +95,10 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public String getDeathDetails(final String name) {
-        DeathNoteRecord record = findRecord(name);
-        if(record == null) return "";
+        final DeathNoteRecord record = findRecord(name);
+        if (record == null) {
+            return "";
+        }
         return record.getDetails();
     }
 
@@ -104,16 +111,15 @@ public class DeathNoteImpl implements DeathNote {
     }
 
     private class DeathNoteRecord {
-    
-        private String name;
+
+        private final String name;
         private String cause;
         private String details;
 
-        private Timer timerDeathCause;
-        private Timer timerDeathDetails;
+        private final Timer timerDeathCause;
+        private final Timer timerDeathDetails;
 
-        public DeathNoteRecord(String name)
-        {
+        DeathNoteRecord(final String name) {
             this.name = name;
             this.cause = "heart attack";
             this.details = "";
@@ -121,60 +127,47 @@ public class DeathNoteImpl implements DeathNote {
             this.timerDeathDetails = new Timer();
         }
 
-        public String getName()
-        {
+        public String getName() {
             return this.name;
         }
-        
-        public String getCause() 
-        {
+
+        public String getCause() {
             return this.cause;
         }
 
-        public String getDetails()
-        {
+        public String getDetails() {
             return this.details;
         }
 
-
-        public boolean setCause(String cause)
-        {
-            if(timerDeathCause.evalueteFor(MAX_MS_CAUSE))
-            {
-                this.cause = cause;
+        public boolean writeCause(final String deathCause) {
+            if (timerDeathCause.evalueteFor(MAX_MS_CAUSE)) {
+                this.cause = deathCause;
                 timerDeathDetails.reset();
                 return true;
             }
             return false;
         }
 
-        public boolean setDetails(String details)
-        {
-            if(timerDeathDetails.evalueteFor(MAX_MS_DETAILS))
-            {
-                this.details = details;
+        public boolean writeDetails(final String deathDetails) {
+            if (timerDeathDetails.evalueteFor(MAX_MS_DETAILS)) {
+                this.details = deathDetails;
                 return true;
             }
             return false;
         }
 
-        private class Timer
-        {
+        private class Timer {
             private long time;
-            
 
-            public Timer()
-            {
+            Timer() {
                 reset();
             }
 
-            public boolean evalueteFor(int timeMax)
-            {
+            public boolean evalueteFor(final int timeMax) {
                 return System.currentTimeMillis() - time < timeMax;
             }
-            
-            public void reset()
-            {
+
+            private void reset() {
                 this.time = System.currentTimeMillis();
             }
         }

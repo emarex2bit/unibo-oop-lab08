@@ -7,22 +7,19 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-
 import it.unibo.deathnote.api.DeathNote;
 import it.unibo.deathnote.impl.DeathNoteImpl;
 
-
 /**
  * Tests the {@link DeatNoteImpl} class.
-*/
+ */
 class TestDeathNote {
 
     /**
      * Test Boundaries.
      */
     @Test
-    void testBoundsRules()
-    {
+    void testBoundsRules() {
         final DeathNoteImpl deathNote = new DeathNoteImpl();
         final IllegalArgumentException e = assertThrowsExactly(IllegalArgumentException.class, 
             () -> {
@@ -37,11 +34,10 @@ class TestDeathNote {
     }
 
     /**
-     * Test Rules Validity in the Death Note
+     * Test Rules Validity in the Death Note.
      */
     @Test
-    void testRulesValidity()
-    {
+    void testRulesValidity() {
         for (final String rule : DeathNote.RULES) {
             assertNotNull(rule);
             assertFalse(rule.isBlank());
@@ -52,8 +48,7 @@ class TestDeathNote {
      * Test Human name written correctly in the Death Note.
      */
     @Test
-    void testWriteName()
-    {
+    void testWriteName() {
         final DeathNoteImpl deathNote = new DeathNoteImpl();
         String name = "Nicola Stroffolino";
         assertFalse(deathNote.isNameWritten(name));
@@ -65,8 +60,9 @@ class TestDeathNote {
     }
 
     @Test
-    void testWriteDeathCause() throws InterruptedException
-    {
+    void testWriteDeathCause() throws InterruptedException {
+        final String hAt = "heart attack";
+        final String kAc = "karting accident";
         final DeathNoteImpl deathNote = new DeathNoteImpl();
         assertThrowsExactly(IllegalStateException.class, 
             () -> {
@@ -74,39 +70,40 @@ class TestDeathNote {
             },
             "Illegal writing of a death cause before any name"
         );
-        String name = "Nicola Stroffolino";
+        String name = "Leonardo Geminiani";
         deathNote.writeName(name);
-        assertTrue(deathNote.getDeathCause(name) == "heart attack");
-        name = "Diego Alessi";
+        assertEquals(deathNote.getDeathCause(name), hAt);
+        name = "Marco Rossi";
         deathNote.writeName(name);
-        deathNote.writeDeathCause("karting accident");
-        assertTrue(deathNote.getDeathCause(name) == "karting accident");
-        
+        deathNote.writeDeathCause(kAc);
+        assertEquals(deathNote.getDeathCause(name), kAc);
+
         Thread.sleep(100);
         deathNote.writeDeathCause("test change");
-        assertTrue(deathNote.getDeathCause(name) == "karting accident");
+        assertEquals(deathNote.getDeathCause(name), kAc);
     }
 
     @Test
-    void testWriteDeathDetails() throws InterruptedException
-    {
+    void testWriteDeathDetails() throws InterruptedException {
+        final String rTo = "ran for too long";
         final DeathNoteImpl deathNote = new DeathNoteImpl();
+        final int timeToTest = 6100;
         assertThrowsExactly(IllegalStateException.class, 
             () -> {
                 deathNote.writeDetails("in a bus");
             },
             "Illegal writing of death details before any name"
         );
-        final String name = "Nicola Stroffolino";
+        final String name = "Napoleone Bonaparte";
         deathNote.writeName(name);
         assertTrue(deathNote.getDeathDetails(name).isBlank());
-        deathNote.writeDetails("ran for too long");
-        assertEquals(deathNote.getDeathDetails(name), "ran for too long");
-        final String name1 = "Diego Alessi";
+        deathNote.writeDetails(rTo);
+        assertEquals(deathNote.getDeathDetails(name), rTo);
+        final String name1 = "Gertrude Amming";
         deathNote.writeName(name1);
-        Thread.sleep(6100);
+        Thread.sleep(timeToTest);
         deathNote.writeDetails("another reason");
-        assertEquals(deathNote.getDeathDetails(name), "ran for too long");
+        assertEquals(deathNote.getDeathDetails(name), rTo);
 
     }
 }
