@@ -1,19 +1,33 @@
 package it.unibo.deathnote.impl;
 
+import java.util.ArrayList;
 import it.unibo.deathnote.api.DeathNote;
+
 
 /**
  * Death Note Implementation.
  */
 public class DeathNoteImpl implements DeathNote {
 
+    public static final int MAX_MS_CAUSE = 40;
+    public static final int MAX_MS_DETAILS = 6040;
+
+    private ArrayList<DeathNoteRecord> records;
+
+    public DeathNoteImpl()
+    {
+        records = new ArrayList<>();
+    }
     /**
      * Get rule number of @param ruleNumber.
      */
     @Override
     public String getRule(final int ruleNumber) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getRule'");
+       if(ruleNumber < 1 || ruleNumber > DeathNote.RULES.size())
+       {
+            throw new IllegalArgumentException("Invalid rule number, only value in the range 1...." + DeathNote.RULES.size());
+       }
+       return DeathNote.RULES.get( ruleNumber - 1 );
     }
 
     /**
@@ -21,8 +35,10 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public void writeName(final String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeName'");
+        if(!isNameWritten(name))
+        {
+            records.add(new DeathNoteRecord(name));
+        }
     }
 
     /**
@@ -30,8 +46,11 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public boolean writeDeathCause(final String cause) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeDeathCause'");
+        if(records.isEmpty()) throw new IllegalStateException("No name written");
+
+        DeathNoteRecord lastRecord = records.getLast();
+
+        return lastRecord.setCause(cause);
     }
 
     /**
@@ -39,8 +58,11 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public boolean writeDetails(final String details) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeDetails'");
+        if(records.isEmpty()) throw new IllegalStateException("No name written");
+
+        DeathNoteRecord lastRecord = records.getLast();
+
+        return lastRecord.setDetails(details);
     }
 
     /**
@@ -48,8 +70,19 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public String getDeathCause(final String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDeathCause'");
+        DeathNoteRecord record = findRecord(name);
+        if(record == null) return "";
+        return record.getCause();
+    }
+
+    private DeathNoteRecord findRecord(String name) {
+        for (var record : records) {
+            if(record.getName() == name)
+            {
+                return record;
+            }
+        }
+        return null;
     }
 
     /**
@@ -57,8 +90,9 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public String getDeathDetails(final String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDeathDetails'");
+        DeathNoteRecord record = findRecord(name);
+        if(record == null) return "";
+        return record.getDetails();
     }
 
     /**
@@ -66,7 +100,83 @@ public class DeathNoteImpl implements DeathNote {
      */
     @Override
     public boolean isNameWritten(final String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isNameWritten'");
+        return findRecord(name) != null;
+    }
+
+    private class DeathNoteRecord {
+    
+        private String name;
+        private String cause;
+        private String details;
+
+        private Timer timerDeathCause;
+        private Timer timerDeathDetails;
+
+        public DeathNoteRecord(String name)
+        {
+            this.name = name;
+            this.cause = "heart attack";
+            this.details = "";
+            this.timerDeathCause = new Timer();
+            this.timerDeathDetails = new Timer();
+        }
+
+        public String getName()
+        {
+            return this.name;
+        }
+        
+        public String getCause() 
+        {
+            return this.cause;
+        }
+
+        public String getDetails()
+        {
+            return this.details;
+        }
+
+
+        public boolean setCause(String cause)
+        {
+            if(timerDeathCause.evalueteFor(MAX_MS_CAUSE))
+            {
+                this.cause = cause;
+                timerDeathDetails.reset();
+                return true;
+            }
+            return false;
+        }
+
+        public boolean setDetails(String details)
+        {
+            if(timerDeathDetails.evalueteFor(MAX_MS_DETAILS))
+            {
+                this.details = details;
+                return true;
+            }
+            return false;
+        }
+
+        private class Timer
+        {
+            private long time;
+            
+
+            public Timer()
+            {
+                reset();
+            }
+
+            public boolean evalueteFor(int timeMax)
+            {
+                return System.currentTimeMillis() - time < timeMax;
+            }
+            
+            public void reset()
+            {
+                this.time = System.currentTimeMillis();
+            }
+        }
     }
 }
